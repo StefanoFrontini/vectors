@@ -16,46 +16,41 @@ export class Plane {
     this.height = canvas.height;
     this.offset = { x: this.width / 2, y: this.height / 2 };
     this.vectorA = new Vector(this.width / 4, this.height / 4, this);
-    this.vectorB = new Vector(-this.width / 8, -this.height / 8, this);
+    // this.vectorB = new Vector(-this.width / 8, -this.height / 8, this);
+    this.vectorB = new Vector(20, 50, this);
     this.axes = new Axes(this);
-    // this.#addEventListeners();
   }
-  #addEventListeners() {
-    this.canvas.addEventListener("mousemove", (e) => {
-      console.log(e);
-      this.vectorA.x = e.clientX - this.offset.x;
-      this.vectorA.y = e.clientY - this.offset.y;
-    });
+  createTransform(
+    originX: number,
+    originY: number,
+    scale: number,
+    rotate: number,
+    ctx: CanvasRenderingContext2D
+  ) {
+    const xAxisX = Math.cos(rotate) * scale;
+    const xAxisY = Math.sin(rotate) * scale;
+    ctx.setTransform(xAxisX, xAxisY, -xAxisY, xAxisX, originX, originY);
   }
+
   render(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.translate(this.offset.x, this.offset.y);
+    // this.createTransform(this.offset.x, this.offset.y, 1, 0, ctx);
+    ctx.clearRect(
+      -this.offset.x,
+      -this.offset.y,
+      ctx.canvas.width,
+      ctx.canvas.height
+    );
 
     this.axes.draw(ctx);
 
-    this.vectorA.drawPoint(ctx);
     this.vectorA.drawArrow(ctx);
-    // if (this.vectorA.magnitude() > 100) {
-    //   this.vectorA.drawArrow(ctx);
-    // } else {
-    //   this.vectorA.drawArrow(ctx, "blue");
-    // }
-    this.vectorB.drawArrow(ctx, "blue");
-    this.vectorB.drawPoint(ctx, "blue", 200);
-    if (this.vectorA.distance(this.vectorB) > 100) {
-      this.vectorB.drawPoint(ctx, "red", 200);
-    }
-    // const vectorC = this.vectorA.add(this.vectorB);
-    // vectorC.normalized().scaleBy(30).drawArrow(ctx, "gray");
-    // console.log(
-    //   this.vectorA.normalized().dotProduct(this.vectorB.normalized())
-    // );
-    // this.vectorA.normalized().drawArrow(ctx, "blue");
-    // const vectorProj = this.vectorB.vectorProjection(this.vectorA);
-    // vectorProj.drawPoint(ctx);
-    // const aNorm = this.vectorA.normalized();
-    // aNorm.draw(ctx);
-    // this.origin.drawPoint(ctx);
+    this.vectorB.drawArrow(ctx);
+    const sum = this.vectorA.add(this.vectorB);
+    sum.drawArrow(ctx, "yellow");
+    const difference = this.vectorA.subtract(this.vectorB);
+    difference.drawArrow(ctx, "blue");
     ctx.restore();
   }
 }
